@@ -1,2 +1,2 @@
-# bni-api [![Build Status](https://travis-ci.org/p4kl0nc4t/bni-api.svg?branch=master)](https://travis-ci.org/p4kl0nc4t/bni-api)
+# bni-api [![Build Status](https://travis-ci.org/p4kl0nc4t/bni-api.svg?branch=master)](https://travis-ci.org/p4kl0nc4t/bni-api) [![Known Vulnerabilities](https://snyk.io/test/github/p4kl0nc4t/bni-api/badge.svg)](https://snyk.io/test/github/p4kl0nc4t/bni-api) [![Maintainability](https://api.codeclimate.com/v1/badges/534cdafc6bac682b7e43/maintainability)](https://codeclimate.com/github/p4kl0nc4t/bni-api/maintainability)
 To put it into perspective, bni-api is simply a Python wrapper for some of BNI's internet banking functionalities. 
