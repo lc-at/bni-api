@@ -1,8 +1,6 @@
 from time import time
 import requests_html
 
-__version__ = '1.0'
-
 BNI_IBANK_URL = 'https://ibank.bni.co.id/MBAWeb/FMB'
 REQ_USER_AGENT = ('Mozilla/5.0 (Linux; U; Android 2.2)' +
                   ' AppleWebKit/533.1 (KHTML, like Gecko)' +
