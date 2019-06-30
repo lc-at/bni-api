@@ -1,39 +1,44 @@
-from time import time
+import datetime
+
 import requests_html
 
-BNI_IBANK_URL = 'https://ibank.bni.co.id/MBAWeb/FMB'
-REQ_USER_AGENT = ('Mozilla/5.0 (Linux; U; Android 2.2)' +
-                  ' AppleWebKit/533.1 (KHTML, like Gecko)' +
-                  ' Version/4.0 Mobile Safari/533.1')
-SESSION_TTL = 5 * 60  # 5 minutes
+from . import constants, utils
 
 
 class IBankSession:
-    """Class that handles a session of BNI Internet Banking (mobile)"""
+    """Class that handles a session of BNI Internet Banking (mobile).
+    To initiate a session, logging in using `login` method is necessary."""
 
     def __init__(self):
         """Initialize the class, session, etc."""
         self.logged_in = False
         self.session = requests_html.HTMLSession(mock_browser=False)
-        self.session.headers['User-Agent'] = REQ_USER_AGENT
-        self.ibank_url = BNI_IBANK_URL
+        self.session.headers['User-Agent'] = constants.REQ_USER_AGENT
+        self.ibank_url = constants.BNI_IBANK_URL
         self.ib_account_name = ''
         self.first_url = ''
         self.last_req = None
-        self.session_ttl = SESSION_TTL
+        self.session_ttl = constants.SESSION_TTL
         self.session_time = None
 
     def _maintain_referer(self, referer: str) -> None:
         """Update the referer header in session (for browser sim)"""
         self.session.headers['Referer'] = referer
 
-    def _parse_form_inputs(self, inp_elems: list, *, filter=[]) -> dict:
-        """Parse input elements into key:value dictionary"""
+    def _parse_form_inputs(self,
+                           inp_elems: list,
+                           *,
+                           white: list = [],
+                           prefix: str = '__') -> dict:
+        """Parse input elements into key:value dictionary.
+        This is useful when submitting a form. If the form is
+        simple, please prefer submitting using `_submit_form` method."""
         rv = {}
         for inp_elem in inp_elems:
             attrs = inp_elem.attrs
             if 'name' in attrs:
-                if filter and attrs.get('name') not in filter:
+                if attrs.get('name').startswith(prefix) \
+                        and white and attrs.get('name') not in white:
                     continue
                 rv[attrs.get('name')] = attrs.get('value', '')
         return rv
@@ -46,7 +51,7 @@ class IBankSession:
                   last_req: bool = True,
                   **kwargs) -> requests_html.HTMLResponse:
         """Send an HTTP request to a URL with option to maintain referer
-        and last request."""
+        header and last request."""
         func = self.session.post
         if method == 'get':
             func = self.session.get
@@ -57,27 +62,31 @@ class IBankSession:
             self.last_req = r
         return r
 
-    def _submit_form(self, *, white: list = [], prefix: str = '__') -> None:
+    def _submit_form(self, *, white: list = [], prefix: str = '__',
+                     add={}) -> None:
+        """Submit the default form in BNI's internet banking interface.
+        This function has `white` or whitelist keyword argument to eliminate
+        another form input that doesn't start with `prefix`"""
         post_data = self._parse_form_inputs(
-            self.last_req.html.xpath('//form[@name="form"]//input'))
-        for k, _ in post_data.copy().items():
-            if k.startswith(prefix) and (not white or
-                                         (white and k not in white)):
-                post_data.pop(k)
+            self.last_req.html.xpath('//form[@name="form"]//input'),
+            white=white,
+            prefix=prefix)
+        post_data = dict(**post_data, **add)
         form_action = self.last_req.html.xpath(
             '//form[@name="form"]/@action')[0]
         r = self._http_req(form_action, data=post_data)
         self.last_req = r
 
     def is_session_alive(self) -> None:
-        """Checks whether the session is still alive, based on SESSION_TTL"""
+        """Needs login. Checks whether the session is still alive,
+        based on SESSION_TTL"""
         if not self.session_time:
             return False
-        return time() - self.session_time < self.session_ttl
+        return datetime.datetime.now() < self.session_time
 
     def login(self, user_id: str, password: str) -> bool:
         """Log in to an account with provided credentials.
-        This will begin session time."""
+        This will begin session time counting."""
         if self.is_session_alive():
             return True
         r = self._http_req(self.ibank_url, 'get')
@@ -101,13 +110,13 @@ class IBankSession:
             self.ib_account_name = self.last_req.html.xpath(
                 '//span[@id="CurrentProfileDisp"]')[0].text
         self.first_url = r.url
-        self.session_time = time() - 10
+        self.session_time = datetime.datetime.now() + datetime.timedelta(
+            seconds=self.session_ttl + 10)
         return True
 
     def logout(self) -> bool:
-        """Log out from current session"""
-        if not self.logged_in or not self.last_req \
-                or not self.is_session_alive():
+        """Needs login. Log out from current session."""
+        if not self.is_session_alive():
             return False
         post_data = self._parse_form_inputs(
             self.last_req.html.xpath('//form[@name="form"]//input'))
@@ -127,18 +136,19 @@ class IBankSession:
         return False
 
     def get_name(self) -> str:
-        """Returns associated account name"""
+        """Needs login. Returns associated internet banking account name.
+        Please note that internet banking account is different than
+        bank account name."""
+        if not self.is_session_alive():
+            return False
         return self.ib_account_name
 
     def get_summary(self) -> dict:
-        """Get bank accounts summary including balances"""
-        rv = {
-            'bank_accounts': {
-                'general_details': {},
-                'balance_details': {}
-            },
-            'total_balance': ''
-        }
+        """Needs login. Get bank accounts summary including their corresponding
+        general and balance details."""
+        if not self.is_session_alive():
+            return False
+        rv = {'bank_accounts': [], 'total_balance': ''}
         rows = ['general_details', 'balance_details']
         cols = [[
             'bank_account_number', 'short_name', 'name', 'product', 'currency'
@@ -157,18 +167,77 @@ class IBankSession:
             '//span[@class="TotalAmt"][last()]')[0].text
         for bank_acc_det in r.html.xpath('//a[contains(@id, "db_acc")]/@href'):
             r = self._http_req(bank_acc_det, 'get')
+            d = dict()
             for i in range(2):
                 key = rows[i]
+                d[key] = dict()
                 for j, v in enumerate(cols[i]):
                     td = r.html.xpath(
                         '//table//td[@id="Row{0}_{0}_column2"]'.format(j +
                                                                        1))[i]
-                    rv['bank_accounts'][key][v] = td.xpath(
-                        '//span')[0].text if td.xpath('//span') else ''
+                    d[key][v] = td.xpath('//span')[0].text if td.xpath(
+                        '//span') else ''
+            rv['bank_accounts'].append(d)
         self._submit_form(white=['__HOME__'])
         return rv
 
-
-if __name__ == '__main__':
-    ib = IBankSession()
-    breakpoint()
+    def get_txn_history(self, account_number: str,
+                        from_date: datetime.datetime,
+                        to_date: datetime.datetime) -> list:
+        """Needs login. Get transaction history of a bank account (specified by
+        `account_number`) in a specific date range (max is 30 days)."""
+        if (to_date - from_date).days >= 30 or (to_date - from_date).days <= 0:
+            return False
+        from_date = utils.date_to_str(from_date)
+        to_date = utils.date_to_str(to_date)
+        if not self.is_session_alive():
+            return False
+        post_data = self._parse_form_inputs(
+            self.last_req.html.xpath('//form[@name="form"]//input'))
+        post_data.pop("LogOut", 0)
+        r = self._http_req(
+            self.last_req.html.xpath('//form[@name="form"]//@action')[0],
+            data=post_data)
+        txn_href = r.html.xpath('//a[@id="TxnHstry"]/@href')[0]
+        self._http_req(txn_href, 'get')
+        self._submit_form(white=[None], add={'MAIN_ACCOUNT_TYPE': 'OPR'})
+        form_action = self.last_req.html.xpath(
+            '//form[@name="form"]/@action')[0]
+        try:
+            selected_acc = self.last_req.html.xpath(
+                f'//input[contains(@id, "acc") and contains'
+                f'(@value, "{account_number}")]/@value')[0]
+        except IndexError:
+            self._submit_form(white=['__HOME__'])
+            raise ValueError("invalid account_number given")
+        post_data = self._parse_form_inputs(
+            self.last_req.html.xpath('//form[@name="form"]//input'),
+            white=[None])
+        post_data['MAIN_ACCOUNT_TYPE'] = 'OPR'
+        post_data['Search_Option'] = 'Date'
+        post_data['TxnPeriod'] = '-1'
+        post_data['txnSrcFromDate'] = from_date
+        post_data['txnSrcToDate'] = to_date
+        post_data['acc1'] = selected_acc
+        r = self._http_req(form_action, data=post_data)
+        hists = []
+        i = 0
+        while i >= 0:
+            hist_item = {
+                'date': 'Tanggal',
+                'description': 'Uraian',
+                'type': 'Tipe',
+                'amount': 'Nominal',
+                'balance': 'Saldo'
+            }
+            try:
+                for k, v in hist_item.copy().items():
+                    hist_item[k] = r.html.xpath(
+                        f'//table//span[contains(text(), "{v}")]'
+                        f'//following::span[1]')[i].text
+            except IndexError:
+                break
+            hists.append(hist_item)
+            i += 1
+        self._submit_form(white=['__HOME__'])
+        return hists
