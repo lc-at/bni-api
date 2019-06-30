@@ -1,6 +1,6 @@
 import datetime
 
-import constants
+from . import constants
 
 
 def str_to_date(s: str) -> datetime.datetime:
@@ -8,7 +8,7 @@ def str_to_date(s: str) -> datetime.datetime:
     here is corresponding to the correct format used in BNI's
     internet banking.
     """
-    return datetime.datetime.strptime(str, constants.DATE_FORMAT)
+    return datetime.datetime.strptime(s, constants.DATE_FORMAT)
 
 
 def date_to_str(d: datetime.datetime) -> str:
@@ -25,7 +25,7 @@ def curr_to_int(curr: str) -> int:
     and '<amount>,00' format.
     Conversion of string 'IDR 30.000,00' will return `30000`
     """
-    curr = curr.rsplit().pop()
-    for r in [',', '.']:
-        curr.replace(r, '')
-    return int(curr)
+    curr = curr.split().pop()
+    for r in [',', '.', ' ']:
+        curr = curr.replace(r, '')
+    return int(curr[:len(curr)-2])
