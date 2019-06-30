@@ -4,7 +4,7 @@ from datetime import datetime
 from bni_api import IBankSession, utils
 
 user_id = os.getenv('USER_ID')
-password = os.getenv('PASS')
+password = os.getenv('PASSWORD')
 
 assert user_id and password
 
