@@ -1,13 +1,18 @@
-dist: xenial   # required for Python >= 3.7
+dist: xenial
 language: python
 python:
-  - "3.7"
-  - "3.7-dev"  # 3.7 development branch
-  - "3.8-dev"  # 3.8 development branch
-  - "nightly"  # nightly build
+- '3.7'
+- 3.7-dev
+- 3.8-dev
+- nightly
 install:
-  - pip install -r requirements.txt
-  - pip install flake8
-  - python setup.py install
+- pip install -r requirements.txt
+- pip install flake8
+- python setup.py install
 script:
-  - flake8 bni_api
+- flake8 bni_api
+- python bni_api
+env:
+  global:
+  - secure: iHw6m18ANAaOQtYIulSJItVMP83KPe6pGJfA6Uc04jGt57sFi7VRxXxqI3HY0s8SYEFoXuqgw14G8DCJg0W+CfeWcnqlNlyK1enCV4Ping2ixnCI6sYCNSSQ+lkgkG79jYM/vJazqnHVisZqd79cHTFBBnMF+w69sHqAoT/WRZESxw7DthS4mcoxFOPADM3/9tgSTgdK2HslToP7gbP67Rh2Uyq6A178MIGbB4fugzV9vUbewz2V4f86tgCVRutpNv7NaV5EzAdbNL7FPTJIfrO3LngZA+YLbG6foznh1naOlLCUnBkBZ9ScorohAacoLl9k3mhNqaTQEtaWiDzlXmi90G08/P4zhvCYjxgrMQ7NhYOjrvwfmWgXK8YPRTrxBw4cKmFNdqm6PSe+7HeMtNdthTNpaZbkkuRgx3GHDpomCIiHBeVFpukBPED6bl7DYSNBjFo+fFqvlWkjeqWG5AJtIybNYRTIwNwYQH/kbea9TpcVFdVMA+DCSGQ5926Uj3O7L1sj8Z3c+JQeY8yMLXAdwJaMjMMKTjryDQp++U5Eej/T0+/XHSiQo89mnSU7VDwQgrGGPdi+UkVd7aiO8WewcMX8n2wcKibVer28ahSsWi4T/7sGsJsUZjB3E0yTyP4eUJop9xXdcbMRn7KWi1AtXXt5wsDQ4jX0AE9hV8w=
+  - secure: IxATOEAh5GELnJ/sT8pryqO5ziio3+G+9pfUbFJQDZ3NMbd8n2eY4x0QVy+3C1WrjwrnKDgEyWwssMbiTCTEVO347U50Cg2lFzqmk7KE4xImdFLNEEYvvDb4srrHK+IzV7+/8czDaUUs16iKNNXK3OCsy1GFPq+heYYWtnU1DcGfU7HezNwU+K/zhvMSMC4Ufeyhq6Vxi1yAxdHiiNrWx0xEaKD+IVb1I2L7h5LZZmdLKG5mfY2cbJ4bP8J+G2gXEDwccqX1r8bjKq7Js2MJqOGuIy3oAV93uOBonJq18ANNUn1VlgF883Sxg6jcGPV814K2gpmwC334d7Uq3NizAkBD0zLKwq2fnEvoAm+1JGgG1E8E+18qzU05eHO3WmXdi+1CZigR3ZDsoT0brqcaKffbFg/FvB3oWbl9tn1kN4OAZ4/4aNab56CQ7/NbafkQKZb/LFXFeKT8wx29GZXY/Ls0wa+h/0gaIsuClP0iA6piECIPd00uc2kwD950JOWqgmiDGtprbY8/pEQAv4dsTQlSj0ef85q/9IP55FftZuZpxzTyzRj0rfHBZNpGANySrWGKi32WCWRyupNw/XaPtW8boofVXx4rgnt7vwUTjKSGROdqMLlrea6HqE/eeSljxwPvLT+TCI7xjssBAj3pY+1mMsuYhQuLw4wi9yWHfAo=
