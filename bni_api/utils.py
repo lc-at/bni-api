@@ -5,7 +5,7 @@ import constants
 
 def str_to_date(s: str) -> datetime.datetime:
     """Convert `str` to `datetime.datetime` object. Date format used
-    here is corresponding to the correct format used in BNI's 
+    here is corresponding to the correct format used in BNI's
     internet banking.
     """
     return datetime.datetime.strptime(str, constants.DATE_FORMAT)
@@ -13,7 +13,7 @@ def str_to_date(s: str) -> datetime.datetime:
 
 def date_to_str(d: datetime.datetime) -> str:
     """Convert `datetime.datetime` to `str` object. Date format used
-    here is corresponding to the correct format used in BNI's 
+    here is corresponding to the correct format used in BNI's
     internet banking.
     """
     return datetime.datetime.strftime(d, constants.DATE_FORMAT)
