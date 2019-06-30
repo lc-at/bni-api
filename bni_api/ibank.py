@@ -203,13 +203,14 @@ class IBankSession:
         self._submit_form(white=[None], add={'MAIN_ACCOUNT_TYPE': 'OPR'})
         form_action = self.last_req.html.xpath(
             '//form[@name="form"]/@action')[0]
-        try:
-            selected_acc = self.last_req.html.xpath(
-                f'//input[contains(@id, "acc") and contains'
-                f'(@value, "{account_number}")]/@value')[0]
-        except IndexError:
+        selected_acc = self.last_req.html.xpath(
+            f'//input[contains(@id, "acc") and contains'
+            f'(@value, "{account_number}")]/@value')
+        if len(selected_acc) < 1:
+            breakpoint()
             self._submit_form(white=['__HOME__'])
             raise ValueError("invalid account_number given")
+        selected_acc = selected_acc[0]
         post_data = self._parse_form_inputs(
             self.last_req.html.xpath('//form[@name="form"]//input'),
             white=[None])
