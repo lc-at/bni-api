@@ -1,7 +1,7 @@
-# bni_api
-
+# bni-api [![Build Status](https://travis-ci.org/ttycelery/bni-api.svg?branch=master)](https://travis-ci.org/ttycelery/bni-api) [![Known Vulnerabilities](https://snyk.io/test/github/ttycelery/bni-api/badge.svg)](https://snyk.io/test/github/ttycelery/bni-api) [![Maintainability](https://api.codeclimate.com/v1/badges/534cdafc6bac682b7e43/maintainability)](https://codeclimate.com/github/ttycelery/bni-api/maintainability)
+To put it into perspective, bni-api is simply a Python wrapper for some of BNI's internet banking functionalities. Some examples available in `examples` folder.
 # bni_api.ibank
-
+This submodule contains ```IBankSession``` which serves its function as session handler.
 ## IBankSession
 ```python
 IBankSession(self)
@@ -45,7 +45,7 @@ IBankSession.get_txn_history(self, account_number: str, from_date: datetime.date
 Needs login. Get transaction history of a bank account (specified by
 `account_number`) in a specific date range (max is 30 days).
 # bni_api.utils
-
+This submodule contains some of utilities that might be useful when extracting data from the ```IBankSession``` class.
 ## str_to_date
 ```python
 str_to_date(s: str) -> datetime.datetime
