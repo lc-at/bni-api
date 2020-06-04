@@ -1,3 +1,5 @@
+### Sorry, this repository is no longer maintained.
+
 # bni-api [![Build Status](https://travis-ci.com/p4kl0nc4t/bni-api.svg?branch=master)](https://travis-ci.com/p4kl0nc4t/bni-api) [![Known Vulnerabilities](https://snyk.io/test/github/p4kl0nc4t/bni-api/badge.svg)](https://snyk.io/test/github/p4kl0nc4t/bni-api) [![Maintainability](https://api.codeclimate.com/v1/badges/534cdafc6bac682b7e43/maintainability)](https://codeclimate.com/github/p4kl0nc4t/bni-api/maintainability)
 To put it into perspective, bni-api is simply a Python wrapper for some of BNI's internet banking functionalities. However, it is not recommended for commercial use. This project is intended for small scale private usage. For commercial use, please prefer using BNI's official API <a href="https://www.bni.co.id/id-id/bisnis/perbankanbisnis/services/otherservices">here</a>.
 ## Installation
